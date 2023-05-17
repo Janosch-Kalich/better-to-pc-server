@@ -33,7 +33,7 @@ The server needs to be restarted in order to apply settings.
 |GET   |`/image`  |                                                               |Shows last received data as image|
 
 ## Libraries
-Libraries are manages by vcpkg.
+Libraries are managed by vcpkg.
 - [WinApi](https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
 - [GLFW](https://www.glfw.org/)
 - [glad](https://github.com/Dav1dde/glad)
