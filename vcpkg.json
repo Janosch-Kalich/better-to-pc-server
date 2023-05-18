@@ -28,5 +28,8 @@
   }, {
     "name" : "nayuki-qr-code-generator",
     "version>=" : "1.8.0"
+  }, {
+    "name" : "boost-algorithm",
+    "version>=" : "1.82.0#1"
   } ]
 }

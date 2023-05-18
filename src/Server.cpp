@@ -1,41 +1,46 @@
 #include "Server.h"
-#include "QR.h"
 
-Server::Server(std::string host, std::uint16_t port, std::string password)
+#include <utility>
+#include "QR.h"
+#include <regex>
+#include <boost/algorithm/string/replace.hpp>
+
+Server::Server(std::string host, std::uint16_t port, std::string password, fs::path templates_path)
 {
-  this->host = host;
+  this->templates.templates_path = std::move(templates_path);
+  this->host = std::move(host);
   this->port = port;
-  this->password = password;
+  this->password = std::move(password);
   this->running = false;
-  this->last_url = "https://janosch-kalich.com";
+}
+
+Json::Value parse_req(std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>> req)
+{
+  Json::Value json;
+
+  std::stringstream ss;
+  ss << req->body();
+
+  ss >> json;
+
+  return json;
 }
 
 auto Server::server_handler()
 {
   auto router = std::make_unique<restinio::router::express_router_t<>>();
 
-  //INCOMING DATA HANDLING
-  router->http_post("/receive", [this](auto req, auto){
-    Json::Value json;
+  //RECEIVE LINK
+  router->http_post("/receive-link", [this](auto req, auto){
+    Json::Value json = parse_req(req);
 
-    std::stringstream ss;
-    ss << req->body();
-
-    ss >> json;
     std::string password = json["pwd"].asString();
     std::string data = json["data"].asString();
 
-    OutputDebugStringA(password.c_str());
-    OutputDebugStringA(data.c_str());
-
     if (password.compare(this->password) == 0)
     {
-      if (data.length() < 1024)
-        ShellExecute(0, 0, data.c_str(), 0, 0, SW_SHOW);
-      else {
-        last_url = data;
-        ShellExecute(0, 0, std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
-      }
+      last_link = data;
+      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/link", this->port).c_str(), 0, 0, SW_SHOW);
 
       auto res = req->create_response();
       res.append_header("Server", "to-pc RESTionio server");
@@ -50,16 +55,91 @@ auto Server::server_handler()
     }
   });
 
+  //RECEIVE IMAGE
+  router->http_post("/receive-image", [this](auto req, auto){
+    Json::Value json = parse_req(req);
+
+    std::string password = json["pwd"].asString();
+    std::string data = json["data"].asString();
+
+    if (password.compare(this->password) == 0)
+    {
+      last_image = data;
+      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
+
+      auto res = req->create_response();
+      res.append_header("Server", "to-pc RESTionio server");
+      res.append_header("Content-Type", "application/json");
+      res.set_body("{\"status\": 200}");
+      return res.done();
+    }
+    else
+    {
+      auto res = req->create_response(restinio::status_forbidden());
+      return res.done();
+    }
+  });
+
+  //RECEIVE PLAIN
+  router->http_post("/receive-plain", [this](auto req, auto){
+    Json::Value json = parse_req(req);
+
+    std::string password = json["pwd"].asString();
+    std::string data = json["data"].asString();
+
+    if (password.compare(this->password) == 0)
+    {
+      last_plain = data;
+      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/plain", this->port).c_str(), 0, 0, SW_SHOW);
+
+      auto res = req->create_response();
+      res.append_header("Server", "to-pc RESTionio server");
+      res.append_header("Content-Type", "application/json");
+      res.set_body("{\"status\": 200}");
+      return res.done();
+    }
+    else
+    {
+      auto res = req->create_response(restinio::status_forbidden());
+      return res.done();
+    }
+  });
+
+  //LINK REDIRECT
+  router->http_get("/link", [this](auto req, auto){
+    if (this->last_link.empty())
+      return req->create_response(restinio::status_not_found()).done();
+
+    auto res = req->create_response();
+    std::string res_body = "<head>"
+                           "<meta http-equiv=\"Refresh\" content=\"0; URL={}\" />"
+                           "</head>";
+    boost::replace_all(res_body, "{}", this->last_link);
+    res.set_body(res_body);
+    return res.done();
+  });
+
   //IMAGE VIEW
   router->http_get("/image", [this](auto req, auto){
+    if (this->last_image.empty())
+      return req->create_response(restinio::status_not_found()).done();
+
     auto res = req->create_response();
-    res.set_body(std::format(
-                             "<body style=\"background-color: black;\">"
-                             "<div style=\"justify-content: center; display: flex;\">"
-                             "<img src=\"{}\"/>"
-                             "</div>"
-                             "</body>"
-                             , this->last_url));
+    std::string res_body = this->templates.image;
+    boost::replace_all(res_body, "{}", this->last_image);
+    res.set_body(res_body);
+    return res.done();
+  });
+
+  //PLAIN VIEW
+  router->http_get("/plain", [this](auto req, auto){
+    if (this->last_plain.empty())
+      return req->create_response(restinio::status_not_found()).done();
+
+    auto res = req->create_response();
+    std::string res_body = this->templates.plain;
+    boost::replace_all(res_body, "{}", this->last_plain);
+    res.set_body(res_body);
     return res.done();
   });
 
@@ -68,22 +148,9 @@ auto Server::server_handler()
     if (req->remote_endpoint().address().to_string().compare(std::string("127.0.0.1")) == 0)
     {
       auto res = req->create_response();
-      res.set_body(
-                   "<head>"
-                   "<style>"
-                   "svg {"
-                   "background-color: white;"
-                   "height: 700px;"
-
-                   "</style>"
-                   "</head>"
-                   "<body style=\"background-color: black;\">"
-                   "<div style=\"justify-content: center; align-items: center; display: flex; max-height: 60%;\">"
-                   +
-                   gen_qr_code(this->port, this->password)
-                   +
-                   "</div>"
-                   "</body>");
+      std::string res_body = this->templates.qr;
+      boost::replace_all(res_body, "{}", gen_qr_code(this->port, this->password));
+      res.set_body(res_body);
 
       return res.done();
     }
@@ -122,6 +189,57 @@ auto Server::server_handler()
 
 int Server::listen()
 {
+  fs::path image_template_path = templates.templates_path;
+  fs::path qr_template_path = templates.templates_path;
+  fs::path plain_template_path = templates.templates_path;
+
+  std::ifstream image_template_file;
+  std::ifstream qr_template_file;
+  std::ifstream plain_template_file;
+
+  image_template_file.open(image_template_path.append("image").append("index.html").c_str());
+  qr_template_file.open(qr_template_path.append("qr").append("index.html").c_str());
+  plain_template_file.open(qr_template_path.append("plain").append("index.html").c_str());
+
+  if (image_template_file.is_open())
+  {
+    std::string line;
+    while (std::getline(image_template_file, line))
+    {
+      this->templates.image += line;
+    }
+
+    image_template_file.close();
+  }
+  else
+    this->templates.image = "{}";
+
+  if (qr_template_file.is_open())
+  {
+    std::string line;
+    while (std::getline(qr_template_file, line))
+    {
+      this->templates.qr += line;
+    }
+
+    qr_template_file.close();
+  }
+  else
+    this->templates.qr = "{}";
+
+  if (plain_template_file.is_open())
+  {
+    std::string line;
+    while (std::getline(plain_template_file, line))
+    {
+      this->templates.plain += line;
+    }
+
+    plain_template_file.close();
+  }
+  else
+    this->templates.plain = "{}";
+
   try {
     using namespace std::chrono;
 

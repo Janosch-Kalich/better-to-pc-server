@@ -26,11 +26,15 @@ The server needs to be restarted in order to apply settings.
 
 ## API
 
-|Method|Endpoint  | Body                                                          |Description                                             |
-|------|----------|---------------------------------------------------------------|--------------------------------------------------------|
-|POST  |`/receive`| `{"pwd": "<PASSWORD>", "data": "<URL/BASE32 ENCODED IMAGE>"}` |Opens `data` in default application via `ShellExecute()`|
-|POST  |`/test`   |                                                               |Opens [janosch-kalich.com](https://janosch-kalich.com)  |
-|GET   |`/image`  |                                                               |Shows last received data as image|
+|Method| Endpoint         | Body                                                      | Description                                            |
+|------|------------------|-----------------------------------------------------------|--------------------------------------------------------|
+|POST  | `/receive-link`  | `{"pwd": "<PASSWORD>", "data": "<URL>"}`                  | Sets `last_link` to data                               |
+|POST  | `/receive-plain` | `{"pwd": "<PASSWORD>", "data": "<PLAIN TEXT>"}`           | Sets `last_plain` to data                              |
+|POST  | `/receive-image` | `{"pwd": "<PASSWORD>", "data": "<BASE64 ENCODED IMAGE>"}` | Sets `last_image` to data                              |
+|GET   | `/link`          |                                                           | Redirects to `last_link`                               |
+|GET   | `/plain`         |                                                           | Redirects to `last_plain`                              |
+|GET   | `/image`         |                                                           | Redirects to `last_image`                              |
+|POST  | `/test`          |                                                           | Opens [janosch-kalich.com](https://janosch-kalich.com) |
 
 ## Libraries
 Libraries are managed by vcpkg.

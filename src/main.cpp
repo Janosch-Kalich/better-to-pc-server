@@ -13,13 +13,10 @@
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
-void tray_handler();
-void server_handler();
 void start_server();
 
 Settings SETTINGS("0.0.0.0", 3333, "Password");
 ServerHandler handler{};
-
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd_show)
 {
@@ -73,7 +70,8 @@ void overwrite_tmp_settings()
 
 void start_server()
 {
-  handler.init(SETTINGS.host, SETTINGS.port, SETTINGS.password);
+  fs::path templates_path = SETTINGS.path;
+  handler.init(SETTINGS.host, SETTINGS.port, SETTINGS.password, templates_path.parent_path().append("resources").append("templates"));
   CURRENT_SETTINGS = SETTINGS;
   handler.start();
 }

@@ -89,8 +89,11 @@ int show_window() {
     ImGui::SetNextWindowSize(io.DisplaySize);
     ImGui::Begin("to-pc-server", nullptr,
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-    ImGui::InputText("-> Host", &TMP_SETTINGS.host);
-    ImGui::InputInt("-> Port", &TMP_PORT);
+    if (TMP_SETTINGS.advanced)
+    {
+      ImGui::InputText("-> Host", &TMP_SETTINGS.host);
+      ImGui::InputInt("-> Port", &TMP_PORT);
+    }
     ImGui::InputText("-> Password", &TMP_SETTINGS.password);
     if (ImGui::Button("Load"))
       overwrite_tmp_settings();
@@ -116,9 +119,12 @@ int show_window() {
     }
     ImGui::Separator();
     ImGui::Text("Current settings:");
-    ImGui::Text(std::format("Host: {}", CURRENT_SETTINGS.host).c_str());
-    ImGui::Text(std::format("Port: {}", std::to_string(CURRENT_SETTINGS.port)).c_str());
-    ImGui::Text(std::format("Port: {}", CURRENT_SETTINGS.password).c_str());
+    if (TMP_SETTINGS.advanced)
+    {
+      ImGui::Text(std::format("Host: {}", CURRENT_SETTINGS.host).c_str());
+      ImGui::Text(std::format("Port: {}", std::to_string(CURRENT_SETTINGS.port)).c_str());
+    }
+    ImGui::Text(std::format("Password: {}", CURRENT_SETTINGS.password).c_str());
     if (ImGui::Button("Show Pairing QR-Code"))
     {
       ShellExecute(0, 0, std::format("http://127.0.0.1:{}/qr", CURRENT_SETTINGS.port).c_str(), 0, 0, SW_SHOW);

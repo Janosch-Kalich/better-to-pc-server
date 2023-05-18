@@ -11,6 +11,7 @@ namespace fs = boost::filesystem;
 
 struct Settings
 {
+  bool advanced;
   fs::path path;
   std::string host;
   std::uint16_t port;
@@ -22,6 +23,7 @@ struct Settings
     path = fs::system_complete(fs::path(__argv[0]));
     fs::path settings_path = path.parent_path().append("settings.json");
 
+    this->advanced = false;
     this->path = settings_path;
     this->host = host;
     this->port = port;
@@ -37,6 +39,7 @@ struct Settings
       std::ifstream file(path.c_str());
       file >> json;
 
+      this->advanced = json["advanced"].asBool();
       this->host = json["host"].asString();
       this->port = static_cast<std::uint16_t>(json["port"].asInt());
       this->password = json["password"].asString();
@@ -57,6 +60,7 @@ struct Settings
       json["host"] = host;
       json["port"] = port;
       json["password"] = password;
+      json["advanced"] = advanced;
 
       Json::StyledWriter writer;
 

@@ -15,6 +15,7 @@
 struct AdapterInfo
 {
   std::string name;
+  std::string desc;
   std::string addr;
 
   AdapterInfo()
@@ -77,7 +78,7 @@ std::vector<AdapterInfo> get_ip_addresses()
     while (pAdapter)
     {
       info.push_back(AdapterInfo{});
-      info[j].name = std::string(pAdapter->Description);
+    info[j].desc = std::string(pAdapter->Description);
 
       info[j].addr = std::string(pAdapter->IpAddressList.IpAddress.String);
 
