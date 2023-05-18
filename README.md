@@ -32,8 +32,8 @@ The server needs to be restarted in order to apply settings.
 |POST  | `/receive-plain` | `{"pwd": "<PASSWORD>", "data": "<PLAIN TEXT>"}`           | Sets `last_plain` to data                              |
 |POST  | `/receive-image` | `{"pwd": "<PASSWORD>", "data": "<BASE64 ENCODED IMAGE>"}` | Sets `last_image` to data                              |
 |GET   | `/link`          |                                                           | Redirects to `last_link`                               |
-|GET   | `/plain`         |                                                           | Redirects to `last_plain`                              |
-|GET   | `/image`         |                                                           | Redirects to `last_image`                              |
+|GET   | `/plain`         |                                                           | Shows `last_plain` in plain template                   |
+|GET   | `/image`         |                                                           | Shows `last_image` in image template                   |
 |POST  | `/test`          |                                                           | Opens [janosch-kalich.com](https://janosch-kalich.com) |
 
 ## Libraries
