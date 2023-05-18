@@ -25,5 +25,8 @@
   }, {
     "name" : "restinio",
     "version>=" : "0.6.18"
+  }, {
+    "name" : "nayuki-qr-code-generator",
+    "version>=" : "1.8.0"
   } ]
 }

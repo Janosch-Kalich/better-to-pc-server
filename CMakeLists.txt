@@ -9,7 +9,7 @@ find_package(glad REQUIRED)
 find_package(imgui REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(restinio REQUIRED)
-
+find_package(unofficial-nayuki-qr-code-generator CONFIG REQUIRED)
 include_directories(traypp/tray/include)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
@@ -18,7 +18,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/ DESTINATION ${CMAKE_CURRENT_BIN
 add_subdirectory(traypp EXCLUDE_FROM_ALL)
 
 if (WIN32)
-    add_executable(${PROJECT_NAME} WIN32 src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/targetver.h src/Settings.h src/ServerHandler.cpp src/ServerHandler.h)
+    add_executable(${PROJECT_NAME} WIN32 src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/targetver.h src/Settings.h src/ServerHandler.cpp src/ServerHandler.h src/QR.h)
 #else (!WIN32)
 #    add_executable(${PROJECT_NAME} src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/Settings.h)
 endif (WIN32)
@@ -32,4 +32,8 @@ target_link_libraries(${PROJECT_NAME}
         imgui::imgui
         JsonCpp::JsonCpp
         restinio::restinio
-        tray)
+        tray
+        unofficial::nayuki-qr-code-generator::nayuki-qr-code-generator
+        wsock32
+        ws2_32
+        iphlpapi)

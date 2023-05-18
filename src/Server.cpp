@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "QR.h"
 
 Server::Server(std::string host, std::uint16_t port, std::string password)
 {
@@ -13,6 +14,7 @@ auto Server::server_handler()
 {
   auto router = std::make_unique<restinio::router::express_router_t<>>();
 
+  //INCOMING DATA HANDLING
   router->http_post("/receive", [this](auto req, auto){
     Json::Value json;
 
@@ -32,7 +34,7 @@ auto Server::server_handler()
         ShellExecute(0, 0, data.c_str(), 0, 0, SW_SHOW);
       else {
         last_url = data;
-        ShellExecute(0, 0, std::format("http://localhost:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
+        ShellExecute(0, 0, std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
       }
 
       auto res = req->create_response();
@@ -48,15 +50,71 @@ auto Server::server_handler()
     }
   });
 
+  //IMAGE VIEW
   router->http_get("/image", [this](auto req, auto){
     auto res = req->create_response();
-    res.set_body(std::format("<body style=\"background-color: black;\"><div style=\"justify-content: center; display: flex;\"><img src=\"{}\"/></div></body>", this->last_url));
+    res.set_body(std::format(
+                             "<body style=\"background-color: black;\">"
+                             "<div style=\"justify-content: center; display: flex;\">"
+                             "<img src=\"{}\"/>"
+                             "</div>"
+                             "</body>"
+                             , this->last_url));
     return res.done();
   });
 
+  //QR-CODE VIEW
+  router->http_get("/qr", [this](auto req, auto){
+    if (req->remote_endpoint().address().to_string().compare(std::string("127.0.0.1")) == 0)
+    {
+      auto res = req->create_response();
+      res.set_body(
+                   "<head>"
+                   "<style>"
+                   "svg {"
+                   "background-color: white;"
+                   "height: 700px;"
+
+                   "</style>"
+                   "</head>"
+                   "<body style=\"background-color: black;\">"
+                   "<div style=\"justify-content: center; align-items: center; display: flex; max-height: 60%;\">"
+                   +
+                   gen_qr_code(this->port, this->password)
+                   +
+                   "</div>"
+                   "</body>");
+
+      return res.done();
+    }
+
+    return req->create_response(restinio::status_forbidden()).done();
+  });
+
+  //TEST ENDPOINT
   router->http_post("/test", [this](auto req, auto){
-    ShellExecute(0, 0, "https://janosch-kalich.com", 0, 0, SW_SHOW);
-    return req->create_response().done();
+    Json::Value json;
+
+    std::stringstream ss;
+    ss << req->body();
+
+    ss >> json;
+    std::string password = json["pwd"].asString();
+    std::string data = json["data"].asString();
+
+    OutputDebugStringA(password.c_str());
+    OutputDebugStringA(data.c_str());
+
+    if (password.compare(this->password) == 0)
+    {
+      ShellExecute(0, 0, "https://janosch-kalich.com", 0, 0, SW_SHOW);
+      return req->create_response().done();
+    }
+    else
+    {
+      auto res = req->create_response(restinio::status_forbidden());
+      return res.done();
+    }
   });
 
   return router;

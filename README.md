@@ -39,7 +39,7 @@ Libraries are managed by vcpkg.
 - [glad](https://github.com/Dav1dde/glad)
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [Boost filesystem](https://www.boost.org/doc/libs/1_82_0/libs/filesystem/doc/index.htm)
-- [Boost program-options)](https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html)
+- [Boost program-options](https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html)
 - [JsonCpp](https://github.com/open-source-parsers/jsoncpp)
 - [Restinio](https://github.com/Stiffstream/restinio)
 - [Traypp](https://github.com/Soundux/traypp)

@@ -11,6 +11,7 @@
 #include <imgui_impl_opengl3_loader.h>
 #include <imgui_stdlib.h>
 #include "Settings.h"
+#include <format>
 
 bool WINDOW_OPEN = false;
 
@@ -113,13 +114,15 @@ int show_window() {
         start_server();
       }
     }
-    ImGui::NewLine();
     ImGui::Separator();
-    ImGui::NewLine();
     ImGui::Text("Current settings:");
     ImGui::Text(std::format("Host: {}", CURRENT_SETTINGS.host).c_str());
     ImGui::Text(std::format("Port: {}", std::to_string(CURRENT_SETTINGS.port)).c_str());
     ImGui::Text(std::format("Port: {}", CURRENT_SETTINGS.password).c_str());
+    if (ImGui::Button("Show Pairing QR-Code"))
+    {
+      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/qr", CURRENT_SETTINGS.port).c_str(), 0, 0, SW_SHOW);
+    }
     ImGui::End();
 
     ImGui::Render();
