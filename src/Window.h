@@ -70,6 +70,10 @@ int show_window() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 3);
 
+  ImVec4* colors = ImGui::GetStyle().Colors;
+
+
+
   ImGui::StyleColorsDark();
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -89,45 +93,52 @@ int show_window() {
     ImGui::SetNextWindowSize(io.DisplaySize);
     ImGui::Begin("to-pc-server", nullptr,
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-    if (TMP_SETTINGS.advanced)
-    {
-      ImGui::InputText("-> Host", &TMP_SETTINGS.host);
-      ImGui::InputInt("-> Port", &TMP_PORT);
-    }
-    ImGui::InputText("-> Password", &TMP_SETTINGS.password);
-    if (ImGui::Button("Load"))
-      overwrite_tmp_settings();
-    ImGui::SameLine();
-    if (ImGui::Button("Save"))
-      overwrite_settings();
-    ImGui::SameLine();
-    if (!server_running())
-    {
-      if (ImGui::Button("Start"))
-        start_server();
-    }
-    if (server_running())
-    {
-      ImGui::SameLine();
-      if (ImGui::Button("Stop"))
-        stop_server();
-      ImGui::SameLine();
-      if (ImGui::Button("Restart")) {
-        stop_server();
-        start_server();
+
+    if (ImGui::CollapsingHeader("Settings")) {
+      ImGui::Separator();
+      if (TMP_SETTINGS.advanced) {
+        ImGui::Text("Host");
+        ImGui::InputText("##host", &TMP_SETTINGS.host);
+        ImGui::Separator();
+        ImGui::Text("Port");
+        ImGui::InputInt("##port", &TMP_PORT);
+        ImGui::Separator();
       }
+      ImGui::Text("Password");
+      ImGui::InputText("##password", &TMP_SETTINGS.password);
+      ImGui::Separator();
+      ImGui::NewLine();
+      if (ImGui::Button("Load"))
+        overwrite_tmp_settings();
+      ImGui::SameLine();
+      if (ImGui::Button("Save"))
+        overwrite_settings();
+      ImGui::NewLine();
     }
-    ImGui::Separator();
-    ImGui::Text("Current settings:");
-    if (TMP_SETTINGS.advanced)
+    if (ImGui::CollapsingHeader("Status"))
     {
-      ImGui::Text(std::format("Host: {}", CURRENT_SETTINGS.host).c_str());
-      ImGui::Text(std::format("Port: {}", std::to_string(CURRENT_SETTINGS.port)).c_str());
-    }
-    ImGui::Text(std::format("Password: {}", CURRENT_SETTINGS.password).c_str());
-    if (ImGui::Button("Show Pairing QR-Code"))
-    {
-      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/qr", CURRENT_SETTINGS.port).c_str(), 0, 0, SW_SHOW);
+      if (!server_running()) {
+        if (ImGui::Button("Start"))
+          start_server();
+      }
+      if (server_running()) {
+        if (ImGui::Button("Stop"))
+          stop_server();
+        ImGui::SameLine();
+        if (ImGui::Button("Restart")) {
+          stop_server();
+          start_server();
+        }
+      }
+
+      if (TMP_SETTINGS.advanced) {
+        ImGui::Text(std::format("Host: {}", CURRENT_SETTINGS.host).c_str());
+        ImGui::Text(std::format("Port: {}", std::to_string(CURRENT_SETTINGS.port)).c_str());
+      }
+      ImGui::Text(std::format("Password: {}", CURRENT_SETTINGS.password).c_str());
+      if (ImGui::Button("Show Pairing QR-Code")) {
+        ShellExecute(0, 0, std::format("http://127.0.0.1:{}/qr", CURRENT_SETTINGS.port).c_str(), 0, 0, SW_SHOW);
+      }
     }
     ImGui::End();
 
