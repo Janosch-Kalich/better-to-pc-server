@@ -26,15 +26,16 @@ The server needs to be restarted in order to apply settings.
 
 ## API
 
-|Method| Endpoint         | Body                                                      | Description                                            |
-|------|------------------|-----------------------------------------------------------|--------------------------------------------------------|
-|POST  | `/receive-link`  | `{"pwd": "<PASSWORD>", "data": "<URL>"}`                  | Sets `last_link` to data                               |
-|POST  | `/receive-plain` | `{"pwd": "<PASSWORD>", "data": "<PLAIN TEXT>"}`           | Sets `last_plain` to data                              |
-|POST  | `/receive-image` | `{"pwd": "<PASSWORD>", "data": "<BASE64 ENCODED IMAGE>"}` | Sets `last_image` to data                              |
-|GET   | `/link`          |                                                           | Redirects to `last_link`                               |
-|GET   | `/plain`         |                                                           | Shows `last_plain` in plain template                   |
-|GET   | `/image`         |                                                           | Shows `last_image` in image template                   |
-|POST  | `/test`          |                                                           | Opens [janosch-kalich.com](https://janosch-kalich.com) |
+| Method | Endpoint         | Body                                                                | Description                                            |
+|--------|------------------|---------------------------------------------------------------------|--------------------------------------------------------|
+| POST   | `/receive-link`  | `{"pwd": "<PASSWORD>", "data": "<URL>"}`                            | Sets `last_link` to data                               |
+| POST   | `/receive-plain` | `{"pwd": "<PASSWORD>", "data": "<PLAIN TEXT>"}`                     | Sets `last_plain` to data                              |
+| POST   | `/receive-image` | `{"pwd": "<PASSWORD>", "data": "<BASE64 ENCODED IMAGE>"}`           | Sets `last_image` to data                              |
+| POST   | `/upload`        | X-Password header, form-data, key of files should start with "file" | Uploads file(s) to temporary directory                 |
+| GET    | `/link`          |                                                                     | Redirects to `last_link`                               |
+| GET    | `/plain`         |                                                                     | Shows `last_plain` in plain template                   |
+| GET    | `/image`         |                                                                     | Shows `last_image` in image template                   |
+| POST   | `/test`          |                                                                     | Opens [janosch-kalich.com](https://janosch-kalich.com) |
 
 ## Libraries
 Libraries are managed by vcpkg.

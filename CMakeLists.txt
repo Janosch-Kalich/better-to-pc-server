@@ -7,7 +7,7 @@ if (MSVC)
     add_compile_options(/bigobj)
 endif()
 
-find_package(Boost COMPONENTS filesystem program_options REQUIRED)
+find_package(Boost COMPONENTS filesystem program_options nowide REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glad REQUIRED)
 find_package(imgui REQUIRED)
@@ -25,7 +25,29 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/ DESTINATION ${CMAKE_CURRENT_BIN
 add_subdirectory(traypp EXCLUDE_FROM_ALL)
 
 if (WIN32)
-    add_executable(${PROJECT_NAME} WIN32 src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/targetver.h src/Settings.h src/ServerHandler.cpp src/ServerHandler.h src/QR.h src/TempFile.cpp src/TempFile.h src/FileBatch.cpp src/FileBatch.h src/ClearTemp.h src/Toast.h src/SingleFileToastHandler.h src/MultiFileToastHandler.h src/FileHelper.h src/Toast.cpp)
+    add_executable(${PROJECT_NAME}
+            WIN32
+            src/main.cpp
+            src/Gui.cpp
+            src/Gui.h
+            src/Window.h
+            src/Server.cpp
+            src/Server.h
+            src/targetver.h
+            src/Settings.h
+            src/ServerHandler.cpp
+            src/ServerHandler.h
+            src/QR.h
+            src/TempFile.cpp
+            src/TempFile.h
+            src/FileBatch.cpp
+            src/FileBatch.h
+            src/ClearTemp.h
+            src/Toast.h
+            src/SingleFileToastHandler.h
+            src/MultiFileToastHandler.h
+            src/FileHelper.h
+            src/Toast.cpp src/StringHelper.h)
 #else (!WIN32)
 #    add_executable(${PROJECT_NAME} src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/Settings.h)
 endif ()
@@ -34,6 +56,7 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE
         Boost::filesystem
         Boost::program_options
+        Boost::nowide
         glfw
         glad::glad
         imgui::imgui

@@ -3,6 +3,7 @@
 #include <shellapi.h>
 #include <boost/algorithm/string/replace.hpp>
 #include "FileHelper.h"
+#include <boost/nowide/fstream.hpp>
 
 TempFile::TempFile(fs::path batch_id, restinio::optional_t<std::string> file_name, restinio::string_view_t body)
 {
@@ -12,11 +13,14 @@ TempFile::TempFile(fs::path batch_id, restinio::optional_t<std::string> file_nam
   path = path.append("to-pc").append(batch_id);
   fs::create_directories(path);
   std::string final_file_name = find_available_name(path, file_name->c_str());
+
   path = path.append(final_file_name);
+
+  OutputDebugString(path.string().c_str());
 
   this->path = path;
 
-  std::ofstream file(path.string(), std::ios::binary);
+  boost::nowide::ofstream file(path.string().c_str(), std::ios::binary);
 
   file.write(body.data(), body.size());
 
@@ -27,13 +31,12 @@ void TempFile::open()
 {
   std::string path = this->path.string();
   boost::replace_all(path, "\\", "\\\\");
-  ShellExecute(0, "open", reinterpret_cast<LPCSTR>(path.c_str()), 0, 0, 0);
+  ShellExecute(0, "open", path.c_str(), 0, 0, 0);
 }
 
 void TempFile::open_with()
 {
-  std::string path_str = path.string();
-  show_file_received_toast(path_str);
+  show_file_received_toast(this->path.string());
 }
 
 void TempFile::del()

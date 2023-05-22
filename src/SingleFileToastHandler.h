@@ -2,16 +2,17 @@
 #define TO_PC_SERVER_SINGLEFILETOASTHANDLER_H
 
 #include <iostream>
-#include <ShObjIdl_core.h>
+#include <ShlObj_core.h>
 #include <wintoast/wintoastlib.h>
+#include "StringHelper.h"
 
 class SingleFileToastHandler : public WinToastLib::IWinToastHandler {
 public:
-  std::wstring path;
+  std::string path;
 
   SingleFileToastHandler(std::string path)
   {
-    this->path = std::wstring(path.begin(), path.end());
+    this->path = path;
   }
 
   void toastActivated() const
@@ -24,6 +25,7 @@ public:
     switch (action_index)
     {
       case (0):
+        std::wstring path = string_to_wstring(this->path);
         OPENASINFO info {
           path.c_str(),
           NULL,

@@ -171,7 +171,6 @@ auto Server::server_handler()
     FileBatch batch(batch_id);
 
     const auto res = restinio::file_upload::enumerate_parts_with_files(*req, [&batch, batch_id](const restinio::file_upload::part_description_t &part) {
-      OutputDebugString(part.name.c_str());
 
       if (part.name.starts_with("file"))
       {
