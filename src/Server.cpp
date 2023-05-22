@@ -2,8 +2,10 @@
 
 #include <utility>
 #include "QR.h"
+#include "FileBatch.h"
 #include <regex>
 #include <boost/algorithm/string/replace.hpp>
+#include <restinio/helpers/file_upload.hpp>
 
 Server::Server(std::string host, std::uint16_t port, std::string password, fs::path templates_path)
 {
@@ -40,7 +42,7 @@ auto Server::server_handler()
     if (password.compare(this->password) == 0)
     {
       last_link = data;
-      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/link", this->port).c_str(), 0, 0, SW_SHOW);
+      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/link", this->port).c_str(), 0, 0, SW_SHOW);
 
       auto res = req->create_response();
       res.append_header("Server", "to-pc RESTionio server");
@@ -50,7 +52,7 @@ auto Server::server_handler()
     }
     else
     {
-      auto res = req->create_response(restinio::status_forbidden());
+      auto res = req->create_response(restinio::status_unauthorized());
       return res.done();
     }
   });
@@ -65,7 +67,7 @@ auto Server::server_handler()
     if (password.compare(this->password) == 0)
     {
       last_image = data;
-      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
+      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
 
       auto res = req->create_response();
       res.append_header("Server", "to-pc RESTionio server");
@@ -75,7 +77,7 @@ auto Server::server_handler()
     }
     else
     {
-      auto res = req->create_response(restinio::status_forbidden());
+      auto res = req->create_response(restinio::status_unauthorized());
       return res.done();
     }
   });
@@ -90,7 +92,7 @@ auto Server::server_handler()
     if (password.compare(this->password) == 0)
     {
       last_plain = data;
-      ShellExecute(0, 0, std::format("http://127.0.0.1:{}/plain", this->port).c_str(), 0, 0, SW_SHOW);
+      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/plain", this->port).c_str(), 0, 0, SW_SHOW);
 
       auto res = req->create_response();
       res.append_header("Server", "to-pc RESTionio server");
@@ -100,7 +102,7 @@ auto Server::server_handler()
     }
     else
     {
-      auto res = req->create_response(restinio::status_forbidden());
+      auto res = req->create_response(restinio::status_unauthorized());
       return res.done();
     }
   });
@@ -155,7 +157,37 @@ auto Server::server_handler()
       return res.done();
     }
 
-    return req->create_response(restinio::status_forbidden()).done();
+    return req->create_response(restinio::status_unauthorized()).done();
+  });
+
+  router->http_post("/upload", [this](auto req, auto){
+    if (!req->header().has_field("X-Password"))
+      return req->create_response(restinio::status_unauthorized()).done();
+
+    if (req->header().get_field("X-Password").compare(this->password) != 0)
+      return req->create_response(restinio::status_unauthorized()).done();
+
+    fs::path batch_id = fs::unique_path();
+    FileBatch batch(batch_id);
+
+    const auto res = restinio::file_upload::enumerate_parts_with_files(*req, [&batch, batch_id](const restinio::file_upload::part_description_t &part) {
+      OutputDebugString(part.name.c_str());
+
+      if (part.name.starts_with("file"))
+      {
+        if (part.filename)
+        {
+          batch.files.push_back(TempFile(batch_id, part.filename, part.body));
+        }
+      }
+
+      return restinio::file_upload::handling_result_t ::continue_enumeration;
+    });
+
+    batch.default_action();
+    this->batches.push_back(batch);
+
+    return req->create_response().done();
   });
 
   //TEST ENDPOINT
@@ -174,12 +206,12 @@ auto Server::server_handler()
 
     if (password.compare(this->password) == 0)
     {
-      ShellExecute(0, 0, "https://janosch-kalich.com", 0, 0, SW_SHOW);
+      ShellExecute(0, "open", "https://janosch-kalich.com", 0, 0, SW_SHOW);
       return req->create_response().done();
     }
     else
     {
-      auto res = req->create_response(restinio::status_forbidden());
+      auto res = req->create_response(restinio::status_unauthorized());
       return res.done();
     }
   });
@@ -199,7 +231,7 @@ int Server::listen()
 
   image_template_file.open(image_template_path.append("image").append("index.html").c_str());
   qr_template_file.open(qr_template_path.append("qr").append("index.html").c_str());
-  plain_template_file.open(qr_template_path.append("plain").append("index.html").c_str());
+  plain_template_file.open(plain_template_path.append("plain").append("index.html").c_str());
 
   if (image_template_file.is_open())
   {

@@ -31,5 +31,8 @@
   }, {
     "name" : "boost-algorithm",
     "version>=" : "1.82.0#1"
+  }, {
+    "name" : "wintoast",
+    "version>=" : "1.2.0#2"
   } ]
 }

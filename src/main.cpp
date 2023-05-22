@@ -9,6 +9,7 @@
 #include "../traypp/tray/include/tray.hpp"
 #include "../traypp/tray/include/components/button.hpp"
 #include "ServerHandler.h"
+#include "ClearTemp.h"
 
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
@@ -36,6 +37,8 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     std::thread window_thread(show_window);
   }
 
+  clear_temp();
+
   CURRENT_SETTINGS = SETTINGS;
 
   start_server();
@@ -50,6 +53,13 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
   }));
 
   tray.run();
+
+  for(FileBatch batch : handler.server->batches)
+  {
+    batch.del();
+  }
+
+  handler.server->batches.clear();
 
   return 0;
 }

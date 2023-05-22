@@ -1,6 +1,7 @@
 #ifndef TO_PC_SERVER_SERVER_H
 #define TO_PC_SERVER_SERVER_H
 
+#include "FileBatch.h"
 #include <restinio/all.hpp>
 #include <json/json.h>
 #include <sstream>
@@ -32,6 +33,7 @@ public:
   std::string last_link;
   std::string last_image;
   std::string last_plain;
+  std::vector<FileBatch> batches;
 
   Server(std::string host, std::uint16_t port, std::string password, fs::path templates_path);
 
