@@ -25,6 +25,6 @@ void FileBatch::default_action()
   }
   else {
     std::string path = fs::temp_directory_path().append("to-pc").append(this->batch_id).string();
-    show_files_received_toast(path);
+    show_files_received_toast(path, files.size());
   }
 }

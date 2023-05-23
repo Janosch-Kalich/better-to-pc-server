@@ -10,6 +10,8 @@
 #include "../traypp/tray/include/components/button.hpp"
 #include "ServerHandler.h"
 #include "ClearTemp.h"
+#include "Toast.h"
+#include "Resources.h"
 
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
@@ -21,6 +23,10 @@ ServerHandler handler{};
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd_show)
 {
+  init_toasts();
+
+  init_resources();
+
   po::options_description desc("to-pc-server");
   desc.add_options()
       ("gui", "Shows gui when starting");

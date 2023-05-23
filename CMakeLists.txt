@@ -47,7 +47,7 @@ if (WIN32)
             src/SingleFileToastHandler.h
             src/MultiFileToastHandler.h
             src/FileHelper.h
-            src/Toast.cpp src/StringHelper.h)
+            src/Toast.cpp src/StringHelper.h src/Resources.h src/Resources.cpp src/EmptyToastHandler.h src/StringHelper.cpp)
 #else (!WIN32)
 #    add_executable(${PROJECT_NAME} src/main.cpp src/Gui.cpp src/Gui.h src/Window.h src/Server.cpp src/Server.h src/Settings.h)
 endif ()

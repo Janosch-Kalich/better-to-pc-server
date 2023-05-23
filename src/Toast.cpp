@@ -1,6 +1,10 @@
 #include "SingleFileToastHandler.h"
 #include "MultiFileToastHandler.h"
+#include "EmptyToastHandler.h"
 #include "Toast.h"
+#include "Resources.h"
+#include <format>
+#include "StringHelper.h"
 
 bool toast_initialized = false;
 
@@ -22,27 +26,50 @@ void example_toast()
   WinToastLib::WinToast::instance()->showToast(tmpl, new SingleFileToastHandler("E:\\qr.jpg"));
 }
 
-void show_file_received_toast(std::string path)
+void show_file_received_toast(fs::path path)
 {
-  if (!toast_initialized)
-    init_toasts();
+  fs::path icon_path = icons();
+  icon_path.append("upload.png");
 
-  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::Text01);
+  fs::path file_name = path;
+
+  std::string file_name_str = file_name.filename().string();
+  std::wstring file_name_wstr = string_to_wstring(file_name_str);
+
+  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::ImageAndText02);
   tmpl.setTextField(L"File received", WinToastLib::WinToastTemplate::FirstLine);
+  tmpl.setTextField(file_name_wstr.c_str(), WinToastLib::WinToastTemplate::SecondLine);
+  tmpl.setImagePath(icon_path.wstring());
   tmpl.addAction(L"Open with");
 
-  WinToastLib::WinToast::instance()->showToast(tmpl, new SingleFileToastHandler(path));
+  WinToastLib::WinToast::instance()->showToast(tmpl, new SingleFileToastHandler(path.string()));
 }
 
-void show_files_received_toast(std::string path)
+void show_files_received_toast(std::string path, unsigned int files)
 {
-  if (!toast_initialized)
-    init_toasts();
+  fs::path icon_path = icons();
+  icon_path.append("upload.png");
 
-  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::Text01);
-  tmpl.setTextField(L"File received", WinToastLib::WinToastTemplate::FirstLine);
+  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::ImageAndText02);
+  tmpl.setTextField(L"Files received", WinToastLib::WinToastTemplate::FirstLine);
+  tmpl.setTextField(std::format(L"Receive {} files", files), WinToastLib::WinToastTemplate::SecondLine);
+  tmpl.setImagePath(icon_path.wstring());
   tmpl.addAction(L"Open folder");
-  //tmpl.addAction(L"Download zip");
 
   WinToastLib::WinToast::instance()->showToast(tmpl, new MultiFileToastHandler(path));
+}
+
+void show_verify_toast(std::string device_name)
+{
+  fs::path path = icons();
+  path.append("check.png");
+
+  std::wstring device_name_wstr = string_to_wstring(device_name);
+
+  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::ImageAndText02);
+  tmpl.setTextField(L"Connected", WinToastLib::WinToastTemplate::FirstLine);
+  tmpl.setTextField(std::format(L"Established connection to {}", device_name_wstr.c_str()), WinToastLib::WinToastTemplate::SecondLine);
+  tmpl.setImagePath(path.wstring());
+
+  WinToastLib::WinToast::instance()->showToast(tmpl, new EmptyToastHandler());
 }

@@ -4,6 +4,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include "FileHelper.h"
 #include <boost/nowide/fstream.hpp>
+#include "StringHelper.h"
 
 TempFile::TempFile(fs::path batch_id, restinio::optional_t<std::string> file_name, restinio::string_view_t body)
 {
@@ -36,7 +37,7 @@ void TempFile::open()
 
 void TempFile::open_with()
 {
-  show_file_received_toast(this->path.string());
+  show_file_received_toast(this->path);
 }
 
 void TempFile::del()

@@ -189,6 +189,21 @@ auto Server::server_handler()
     return req->create_response().done();
   });
 
+  //Verify
+  router->http_post("/verify", [this](auto req, auto){
+    if (!req->header().has_field("X-Password"))
+      return req->create_response(restinio::status_unauthorized()).done();
+
+    if (req->header().get_field("X-Password").compare(this->password) != 0)
+      return req->create_response(restinio::status_unauthorized()).done();
+
+    Json::Value json = parse_req(req);
+
+    show_verify_toast(json["device_name"].asString());
+
+    return req->create_response().done();
+  });
+
   //TEST ENDPOINT
   router->http_post("/test", [this](auto req, auto){
     Json::Value json;
