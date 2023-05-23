@@ -34,77 +34,59 @@ auto Server::server_handler()
 
   //RECEIVE LINK
   router->http_post("/receive-link", [this](auto req, auto){
+    if (this->auth(req) == 401)
+      return req->create_response(restinio::status_unauthorized()).done();
+
     Json::Value json = parse_req(req);
 
-    std::string password = json["pwd"].asString();
     std::string data = json["data"].asString();
 
-    if (password.compare(this->password) == 0)
-    {
-      last_link = data;
-      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/link", this->port).c_str(), 0, 0, SW_SHOW);
+    last_link = data;
+    ShellExecute(0, "open", std::format("http://127.0.0.1:{}/link", this->port).c_str(), 0, 0, SW_SHOW);
 
-      auto res = req->create_response();
-      res.append_header("Server", "to-pc RESTionio server");
-      res.append_header("Content-Type", "application/json");
-      res.set_body("{\"status\": 200}");
-      return res.done();
-    }
-    else
-    {
-      auto res = req->create_response(restinio::status_unauthorized());
-      return res.done();
-    }
+    auto res = req->create_response();
+    res.append_header("Server", "to-pc RESTionio server");
+    res.append_header("Content-Type", "application/json");
+    res.set_body("{\"status\": 200}");
+    return res.done();
   });
 
   //RECEIVE IMAGE
   router->http_post("/receive-image", [this](auto req, auto){
+    if (this->auth(req) == 401)
+      return req->create_response(restinio::status_unauthorized()).done();
+
     Json::Value json = parse_req(req);
 
-    std::string password = json["pwd"].asString();
     std::string data = json["data"].asString();
 
-    if (password.compare(this->password) == 0)
-    {
-      last_image = data;
-      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
+    last_image = data;
+    ShellExecute(0, "open", std::format("http://127.0.0.1:{}/image", this->port).c_str(), 0, 0, SW_SHOW);
 
-      auto res = req->create_response();
-      res.append_header("Server", "to-pc RESTionio server");
-      res.append_header("Content-Type", "application/json");
-      res.set_body("{\"status\": 200}");
-      return res.done();
-    }
-    else
-    {
-      auto res = req->create_response(restinio::status_unauthorized());
-      return res.done();
-    }
+    auto res = req->create_response();
+    res.append_header("Server", "to-pc RESTionio server");
+    res.append_header("Content-Type", "application/json");
+    res.set_body("{\"status\": 200}");
+    return res.done();
   });
 
   //RECEIVE PLAIN
   router->http_post("/receive-plain", [this](auto req, auto){
+    if (this->auth(req) == 401)
+      return req->create_response(restinio::status_unauthorized()).done();
+
     Json::Value json = parse_req(req);
 
-    std::string password = json["pwd"].asString();
     std::string data = json["data"].asString();
 
-    if (password.compare(this->password) == 0)
-    {
-      last_plain = data;
-      ShellExecute(0, "open", std::format("http://127.0.0.1:{}/plain", this->port).c_str(), 0, 0, SW_SHOW);
+    last_plain = data;
+    ShellExecute(0, "open", std::format("http://127.0.0.1:{}/plain", this->port).c_str(), 0, 0, SW_SHOW);
 
-      auto res = req->create_response();
-      res.append_header("Server", "to-pc RESTionio server");
-      res.append_header("Content-Type", "application/json");
-      res.set_body("{\"status\": 200}");
-      return res.done();
-    }
-    else
-    {
-      auto res = req->create_response(restinio::status_unauthorized());
-      return res.done();
-    }
+    auto res = req->create_response();
+    res.append_header("Server", "to-pc RESTionio server");
+    res.append_header("Content-Type", "application/json");
+    res.set_body("{\"status\": 200}");
+    return res.done();
   });
 
   //LINK REDIRECT
@@ -161,10 +143,7 @@ auto Server::server_handler()
   });
 
   router->http_post("/upload", [this](auto req, auto){
-    if (!req->header().has_field("X-Password"))
-      return req->create_response(restinio::status_unauthorized()).done();
-
-    if (req->header().get_field("X-Password").compare(this->password) != 0)
+    if (this->auth(req) == 401)
       return req->create_response(restinio::status_unauthorized()).done();
 
     fs::path batch_id = fs::unique_path();
@@ -323,4 +302,15 @@ void Server::shutdown()
   restinio::initiate_shutdown(*this->server);
   this->server_thread->join();
   this->running = false;
+}
+
+int Server::auth(std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>> req)
+{
+  if (!req->header().has_field("X-Password"))
+    return 401;
+
+  if (req->header().get_field("X-Password").compare(this->password) != 0)
+    return 401;
+
+  return 200;
 }
