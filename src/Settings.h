@@ -1,6 +1,7 @@
 #ifndef TO_PC_SERVER_SETTINGS_H
 #define TO_PC_SERVER_SETTINGS_H
 
+#include <Windows.h>
 #include <iostream>
 #include <string>
 #include <fstream>

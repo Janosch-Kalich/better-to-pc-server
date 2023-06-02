@@ -1,17 +1,20 @@
 #include "targetver.h"
+#include <exception>
 #include <iostream>
 #include "Server.h"
-#include "Window.h"
 #include <Windows.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <stdlib.h>
+#include <string>
 #include "../traypp/tray/include/tray.hpp"
 #include "../traypp/tray/include/components/button.hpp"
 #include "ServerHandler.h"
 #include "ClearTemp.h"
 #include "Toast.h"
 #include "Resources.h"
+#include "Communication.h"
+#include "ComFunctions.h"
 
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
@@ -21,40 +24,35 @@ void start_server();
 Settings SETTINGS("0.0.0.0", 3333, "Password");
 ServerHandler handler{};
 
+void stop_server();
+void start_server();
+
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd_show)
 {
   init_toasts();
 
-  init_resources();
-
-  po::options_description desc("to-pc-server");
-  desc.add_options()
-      ("gui", "Shows gui when starting");
-
-  po::variables_map vm;
-  po::store(po::parse_command_line(__argc, __argv, desc), vm);
-  po::notify(vm);
-
-  SETTINGS.load();
-
-  if (vm.count("gui"))
-  {
-    overwrite_tmp_settings();
-    std::thread window_thread(show_window);
-  }
+  Resources::init_resources();
 
   clear_temp();
-
-  CURRENT_SETTINGS = SETTINGS;
+  
+  SETTINGS.load();
 
   start_server();
 
-  Tray::Tray tray("to-pc-server", "resources/icons/favicon.ico");
-  tray.addEntries(Tray::Button("Show UI", [&]{
-    overwrite_tmp_settings();
-    show_window();
-  }), Tray::Button("Exit", [&]{
+  Communication::add_var("host", SETTINGS.host, host_change, host_get);
+  Communication::add_var("port", std::to_string(SETTINGS.port), port_change, port_get);
+  Communication::add_var("password", SETTINGS.password, password_change, password_get);
+  Communication::add_var("server_running", std::to_string(handler.server->running), server_runnning_change, server_runnning_get);
+  Communication::add_function("start_server", start_server);
+  Communication::add_function("stop_server", stop_server);
+
+  std::thread com_thread (&Communication::listen);
+
+  Tray::Tray tray("to-pc-server", Resources::icons().append("favicon.ico").string());
+  tray.addEntries(Tray::Button("Exit", [&]{
     tray.exit();
+    Communication::shutdown();
+    com_thread.join();
     handler.stop();
   }));
 
@@ -70,25 +68,10 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
   return 0;
 }
 
-void overwrite_settings()
-{
-  SETTINGS = TMP_SETTINGS;
-  SETTINGS.port = static_cast<std::uint16_t>(TMP_PORT);
-  SETTINGS.save();
-}
-
-void overwrite_tmp_settings()
-{
-  SETTINGS.load();
-  TMP_SETTINGS = SETTINGS;
-  TMP_PORT = static_cast<int>(SETTINGS.port);
-}
-
 void start_server()
 {
   fs::path templates_path = SETTINGS.path;
   handler.init(SETTINGS.host, SETTINGS.port, SETTINGS.password, templates_path.parent_path().append("resources").append("templates"));
-  CURRENT_SETTINGS = SETTINGS;
   handler.start();
 }
 

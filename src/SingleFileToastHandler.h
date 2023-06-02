@@ -5,12 +5,17 @@
 #include <ShlObj_core.h>
 #include <wintoast/wintoastlib.h>
 #include "StringHelper.h"
+#include <boost/filesystem.hpp>
+#include <shellapi.h>
+#include <boost/algorithm/string/replace.hpp>
+
+namespace fs = boost::filesystem;
 
 class SingleFileToastHandler : public WinToastLib::IWinToastHandler {
 public:
-  std::string path;
+  fs::path path;
 
-  SingleFileToastHandler(std::string path)
+  SingleFileToastHandler(fs::path path)
   {
     this->path = path;
   }
@@ -22,16 +27,24 @@ public:
 
   void toastActivated(int action_index) const
   {
+    std::wstring path = string_to_wstring(this->path.string());
+    OPENASINFO info {
+        path.c_str(),
+        NULL,
+        OAIF_EXEC
+    };
+
     switch (action_index)
     {
       case (0):
-        std::wstring path = string_to_wstring(this->path);
-        OPENASINFO info {
-          path.c_str(),
-          NULL,
-          OAIF_EXEC
-        };
         SHOpenWithDialog(NULL, &info);
+        break;
+      case (1):
+        fs::path parent = this->path.parent_path();
+        std::string parent_str = parent.string();
+        boost::replace_all(parent_str, "\\", "\\\\");
+        ShellExecute(0, "explore", parent_str.c_str(), 0, 0, SW_SHOWNORMAL);
+        OutputDebugString(parent_str.c_str());
         break;
     }
   }

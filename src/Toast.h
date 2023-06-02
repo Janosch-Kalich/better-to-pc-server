@@ -19,4 +19,6 @@ void show_files_received_toast(std::string path, unsigned int files);
 
 void show_verify_toast(std::string device_name);
 
+void show_security_toast();
+
 #endif //TO_PC_SERVER_TOAST_H

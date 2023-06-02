@@ -44,7 +44,7 @@ public:
 private:
   auto server_handler();
 
-  int auth(std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>> req);
+  restinio::http_status_line_t auth(std::shared_ptr<restinio::generic_request_t<restinio::no_extra_data_factory_t::data_t>> req);
 };
 
 #endif //TO_PC_SERVER_SERVER_H

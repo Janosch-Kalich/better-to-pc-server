@@ -1,6 +1,7 @@
 #include "SingleFileToastHandler.h"
 #include "MultiFileToastHandler.h"
 #include "EmptyToastHandler.h"
+#include "SecurityToastHandler.h"
 #include "Toast.h"
 #include "Resources.h"
 #include <format>
@@ -28,7 +29,7 @@ void example_toast()
 
 void show_file_received_toast(fs::path path)
 {
-  fs::path icon_path = icons();
+  fs::path icon_path = Resources::icons();
   icon_path.append("upload.png");
 
   fs::path file_name = path;
@@ -41,13 +42,14 @@ void show_file_received_toast(fs::path path)
   tmpl.setTextField(file_name_wstr.c_str(), WinToastLib::WinToastTemplate::SecondLine);
   tmpl.setImagePath(icon_path.wstring());
   tmpl.addAction(L"Open with");
+  tmpl.addAction(L"Show folder");
 
-  WinToastLib::WinToast::instance()->showToast(tmpl, new SingleFileToastHandler(path.string()));
+  WinToastLib::WinToast::instance()->showToast(tmpl, new SingleFileToastHandler(path));
 }
 
 void show_files_received_toast(std::string path, unsigned int files)
 {
-  fs::path icon_path = icons();
+  fs::path icon_path = Resources::icons();
   icon_path.append("upload.png");
 
   WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::ImageAndText02);
@@ -61,7 +63,7 @@ void show_files_received_toast(std::string path, unsigned int files)
 
 void show_verify_toast(std::string device_name)
 {
-  fs::path path = icons();
+  fs::path path = Resources::icons();
   path.append("check.png");
 
   std::wstring device_name_wstr = string_to_wstring(device_name);
@@ -72,4 +74,19 @@ void show_verify_toast(std::string device_name)
   tmpl.setImagePath(path.wstring());
 
   WinToastLib::WinToast::instance()->showToast(tmpl, new EmptyToastHandler());
+}
+
+void show_security_toast()
+{
+  fs::path path = Resources::icons();
+  path.append("report.png");
+
+  WinToastLib::WinToastTemplate tmpl = WinToastLib::WinToastTemplate(WinToastLib::WinToastTemplate::ImageAndText02);
+  tmpl.setTextField(L"Locked", WinToastLib::WinToastTemplate::FirstLine);
+  tmpl.setTextField(L"Too many connection attempts with a wrong password", WinToastLib::WinToastTemplate::SecondLine);
+  tmpl.setImagePath(path.wstring());
+  tmpl.addAction(L"Dismiss");
+  tmpl.addAction(L"Unlock");
+
+  WinToastLib::WinToast::instance()->showToast(tmpl, new SecurityToastHandler());
 }

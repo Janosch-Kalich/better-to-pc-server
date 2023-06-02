@@ -5,14 +5,17 @@
 
 namespace fs = boost::filesystem;
 
-extern fs::path resources_root;
+namespace Resources
+{
+  extern fs::path resources_root;
 
-void init_resources();
+  void init_resources();
 
-fs::path fonts();
+  fs::path fonts();
 
-fs::path icons();
+  fs::path icons();
 
-fs::path templates();
+  fs::path templates();
+}
 
 #endif //TO_PC_SERVER_RESOURCES_H
