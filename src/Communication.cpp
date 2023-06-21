@@ -1,7 +1,6 @@
 #include "Communication.h"
 #include "com.pb.h"
 #include <chrono>
-#include <vcruntime_string.h>
 #include <zmq.h>
 #include <zmq.hpp>
 
@@ -98,7 +97,7 @@ namespace Communication
         if (shared_functions.contains(msg.set_data().var() + "_update"))
           shared_functions[msg.set_data().var() + "_update"]();
         break;
-      case (to_pc_server::MessageType::DO):
+    case (to_pc_server::MessageType::DO):
         shared_functions[msg.do_data().function_id()]();
         break;
       default:

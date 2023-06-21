@@ -27,6 +27,8 @@ ServerHandler handler{};
 void stop_server();
 void start_server();
 
+bool changes = false;
+
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd_show)
 {
   init_toasts();
@@ -39,10 +41,16 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 
   start_server();
 
+  Communication::add_var("tmp_dir", fs::temp_directory_path().append("to-pc").string(), tmp_dir_change);
+
   Communication::add_var("host", SETTINGS.host, host_change, host_get);
   Communication::add_var("port", std::to_string(SETTINGS.port), port_change, port_get);
   Communication::add_var("password", SETTINGS.password, password_change, password_get);
+
+  Communication::add_var("changes", std::to_string(changes), changes_change, changes_get);
+
   Communication::add_var("server_running", std::to_string(handler.server->running), server_runnning_change, server_runnning_get);
+
   Communication::add_function("start_server", start_server);
   Communication::add_function("stop_server", stop_server);
 

@@ -1,11 +1,16 @@
 #include "Communication.h"
+#include "FileBatch.h"
 #include "ServerHandler.h"
 #include "Settings.h"
+#include "TempFile.h"
 #include "com.pb.h"
+#include <boost/filesystem/operations.hpp>
 #include <string>
+#include "ComFunctions.h"
 
 extern Settings SETTINGS;
 extern ServerHandler handler;
+extern bool changes;
 
 void host_get()
 {
@@ -40,6 +45,20 @@ void password_change()
   SETTINGS.save();
 }
 
+void changes_get()
+{
+  changes = !(SETTINGS.host == handler.server->host && 
+            SETTINGS.port == handler.server->port &&
+            SETTINGS.password == handler.server->password);
+
+  Communication::shared_variables["changes"] = std::to_string(changes);
+}
+
+void changes_change()
+{
+  changes_get();
+}
+
 void server_runnning_get()
 {
   Communication::shared_variables["server_running"] = std::to_string(handler.server->running);
@@ -48,4 +67,9 @@ void server_runnning_get()
 void server_runnning_change()
 {
   Communication::shared_variables["server_running"] = std::to_string(handler.server->running);
+}
+
+
+void tmp_dir_change() {
+  Communication::shared_variables["tmp_dir"] = fs::temp_directory_path().append("to-pc").string();
 }

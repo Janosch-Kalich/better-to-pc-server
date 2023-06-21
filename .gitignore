@@ -2,5 +2,6 @@ build
 build-debug
 build-release
 .idea
-.exe
 debug
+.cache
+.exe
