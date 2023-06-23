@@ -15,6 +15,7 @@
 #include "Resources.h"
 #include "Communication.h"
 #include "ComFunctions.h"
+#include "Trys.h"
 
 namespace fs = boost::filesystem;
 
@@ -50,8 +51,11 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 
   Communication::add_var("server_running", std::to_string(handler.server->running), server_runnning_change, server_runnning_get);
 
+  Communication::add_var("locked", std::to_string(Trys::locked), locked_change, locked_get);
+
   Communication::add_function("start_server", start_server);
   Communication::add_function("stop_server", stop_server);
+  Communication::add_function("unlock", Trys::unlock);
 
   std::thread com_thread (&Communication::listen);
 

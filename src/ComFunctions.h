@@ -15,6 +15,9 @@ void changes_change();
 void server_runnning_get();
 void server_runnning_change();
 
+void locked_change();
+void locked_get();
+
 void files_change();
 void files_get();
 

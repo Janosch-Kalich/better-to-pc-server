@@ -7,6 +7,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <string>
 #include "ComFunctions.h"
+#include "Trys.h"
 
 extern Settings SETTINGS;
 extern ServerHandler handler;
@@ -69,6 +70,15 @@ void server_runnning_change()
   Communication::shared_variables["server_running"] = std::to_string(handler.server->running);
 }
 
+void locked_get()
+{
+  Communication::shared_variables["locked"] = std::to_string(Trys::locked);
+}
+
+void locked_change()
+{
+  locked_get();
+}
 
 void tmp_dir_change() {
   Communication::shared_variables["tmp_dir"] = fs::temp_directory_path().append("to-pc").string();
