@@ -10,9 +10,6 @@ if (MSVC)
 endif()
 
 find_package(Boost COMPONENTS filesystem program_options nowide REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(glad REQUIRED)
-find_package(imgui REQUIRED)
 find_package(jsoncpp REQUIRED)
 find_package(restinio REQUIRED)
 find_package(unofficial-nayuki-qr-code-generator CONFIG REQUIRED)
@@ -32,8 +29,6 @@ add_subdirectory(traypp EXCLUDE_FROM_ALL)
 add_executable(${PROJECT_NAME}
         WIN32
         src/main.cpp
-        src/Gui.cpp
-        src/Gui.h
         src/Server.cpp
         src/Server.h
         src/targetver.h
@@ -75,9 +70,6 @@ target_link_libraries(${PROJECT_NAME}
         Boost::filesystem
         Boost::program_options
         Boost::nowide
-        glfw
-        glad::glad
-        imgui::imgui
         JsonCpp::JsonCpp
         restinio::restinio
         tray

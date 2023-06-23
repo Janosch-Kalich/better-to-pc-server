@@ -17,7 +17,6 @@
 #include "ComFunctions.h"
 
 namespace fs = boost::filesystem;
-namespace po = boost::program_options;
 
 void start_server();
 

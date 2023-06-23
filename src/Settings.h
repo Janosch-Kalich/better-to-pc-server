@@ -2,6 +2,7 @@
 #define TO_PC_SERVER_SETTINGS_H
 
 #include <Windows.h>
+#include <boost/filesystem/operations.hpp>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -20,9 +21,13 @@ struct Settings
 
   Settings (std::string host, std::uint16_t port, std::string password)
   {
-    fs::path path (fs::initial_path<fs::path>());
-    path = fs::system_complete(fs::path(__argv[0]));
-    fs::path settings_path = path.parent_path().append("settings.json");
+    char* pValue;
+    size_t len;
+    errno_t err = _dupenv_s(&pValue, &len, "APPDATA");
+    fs::path path = fs::path(pValue);
+    path.append("to-pc");
+    fs::create_directories(path);
+    fs::path settings_path = path.append("settings.json");
 
     this->advanced = false;
     this->path = settings_path;
