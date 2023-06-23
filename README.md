@@ -6,10 +6,7 @@
 5. [Build](#5.Build)
 
 ## Installation
-Execute this command in the build/executable directory.
-``` powershell
-iex ((New-Object System.Net.WebClient).DownloadString(https://gist.githubusercontent.com/Janosch-Kalich/10f3c2c8748e3c707ec7191bb7d76761/raw/68c4240e1a2f3e827c2fd16be9209c92d6a5e0b8/better-to-pc-server-installer))
-```
+TODO: Link to installer
 
 ## Usage
 Default settings:
@@ -20,7 +17,7 @@ Default settings:
 |Port    |3333    |
 |Password|Password|
 
-Settings can be changed in the GUI which can be opened by right clicking the icon in the system tray and selecting "Show UI".
+TODO: explain GUI
 
 The server needs to be restarted in order to apply settings.
 
@@ -40,10 +37,8 @@ The server needs to be restarted in order to apply settings.
 
 ## Libraries
 Libraries are managed by vcpkg.
+TODO: Add missing libs
 - [WinApi](https://learn.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
-- [GLFW](https://www.glfw.org/)
-- [glad](https://github.com/Dav1dde/glad)
-- [Dear ImGui](https://github.com/ocornut/imgui)
 - [Boost filesystem](https://www.boost.org/doc/libs/1_82_0/libs/filesystem/doc/index.htm)
 - [Boost program-options](https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html)
 - [JsonCpp](https://github.com/open-source-parsers/jsoncpp)
@@ -52,6 +47,7 @@ Libraries are managed by vcpkg.
 
 ## Build
 In source directory:
+TODO: more detailed command
 ``` powershell
 cmake -G Ninja -S . -B build --DCMAKE_TOOLCHAIN_FILE="<PATH TO VCPKG TOOLCHAIN FILE>"
 ```
